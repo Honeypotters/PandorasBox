@@ -1,8 +1,15 @@
 // components/dashboard/DonutChart.tsx
 "use client";
 
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import React from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 interface ChartDataItem {
   name: string;
@@ -23,11 +30,11 @@ const DonutChart: React.FC<DonutChartProps> = ({ title, data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Tooltip
-              cursor={{ fill: 'transparent' }}
+              cursor={{ fill: "transparent" }}
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                border: '1px solid #000',
-                borderRadius: '0.5rem'
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid #000",
+                borderRadius: "0.5rem",
               }}
             />
             <Legend iconType="circle" />

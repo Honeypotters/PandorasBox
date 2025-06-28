@@ -1,8 +1,17 @@
 // components/dashboard/BarChart.tsx
 "use client";
 
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LabelList, Cell } from 'recharts';
+import React from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  LabelList,
+  Cell,
+} from "recharts";
 
 interface ChartDataItem {
   name: string;
@@ -33,18 +42,22 @@ const BarChartComponent: React.FC<BarChartProps> = ({ title, data }) => {
               axisLine={false}
               tickLine={false}
               width={120}
-              tick={{ fill: '#374151', fontSize: 14 }}
+              tick={{ fill: "#374151", fontSize: 14 }}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(243, 244, 246, 0.5)' }}
+              cursor={{ fill: "rgba(243, 244, 246, 0.5)" }}
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                border: '1px solid #000',
-                borderRadius: '0.5rem'
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid #000",
+                borderRadius: "0.5rem",
               }}
             />
             <Bar dataKey="value" barSize={25} radius={[0, 4, 4, 0]}>
-              <LabelList dataKey="value" position="right" style={{ fill: '#1f2937', fontSize: 12 }} />
+              <LabelList
+                dataKey="value"
+                position="right"
+                style={{ fill: "#1f2937", fontSize: 12 }}
+              />
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}

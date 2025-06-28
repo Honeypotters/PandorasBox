@@ -1,5 +1,5 @@
 // components/dashboard/ActivityList.tsx
-import React from 'react';
+import React from "react";
 
 interface ActivityListProps {
   title: string;
@@ -12,8 +12,8 @@ const ActivityList: React.FC<ActivityListProps> = ({ title, items }) => {
       <h2 className="text-lg font-bold text-black mb-4">{title}</h2>
       <ul className="space-y-3">
         {items.map((item, index) => (
-          <li 
-            key={index} 
+          <li
+            key={index}
             className="text-sm text-gray-800 border-b border-gray-200 pb-2 font-mono truncate"
           >
             {item}
