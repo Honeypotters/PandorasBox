@@ -16,7 +16,7 @@ interface LayoutProps {
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex min-h-screen w-full">
       <Head>
         <meta httpEquiv="content-language" content="en-us"></meta>
         <meta name="author" content="The Honeypotters"></meta>
