@@ -1,7 +1,14 @@
 // src/app/layout.tsx
-import Sidebar from './Sidebar';
 import Head from 'next/head';
 import { ReactNode } from 'react';
+
+import Header from './Header';
+import Sidebar from './Sidebar';
+
+import '../../globals.css';
+import 'leaflet/dist/leaflet.css'; 
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,10 +16,10 @@ interface LayoutProps {
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen w-full">
       <Head>
         <meta httpEquiv="content-language" content="en-us"></meta>
-        <meta name="author" content="Samuel Paynter "></meta>
+        <meta name="author" content="The Honeypotters"></meta>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
         <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
@@ -21,8 +28,9 @@ export default function RootLayout({ children }: LayoutProps) {
         <meta name="apple-mobile-web-app-title" content="Pandora's Box" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </Head>
+      <Header />
 
-      <main className="flex-1">
+      <main className="flex mt-16 w-full">
         {children}
       </main>
     </div>

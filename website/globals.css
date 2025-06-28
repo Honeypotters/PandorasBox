@@ -35,27 +35,43 @@
   scrollbar-color: var(--scrollbar-color) transparent;
 }
 
-.github-corner:hover .octo-arm {
-  animation: octocat-wave 560ms ease-in-out;
+
+
+/* Leaflet Map Customisation */
+.custom-dot-marker {
+  background-color: #000000;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50%;
 }
 
-@keyframes octocat-wave {
-  0%, 100% {
-    transform: rotate(0);
-  }
-  20%, 60% {
-    transform: rotate(-25deg);
-  }
-  40%, 80% {
-    transform: rotate(10deg);
-  }
+.custom-cluster-icon {
+  display: grid !important;
+  place-items: center !important;
+  background-color:rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  border-radius: 50%;
+  font-weight: bold;
 }
 
-@media (max-width: 500px) {
-  .github-corner:hover .octo-arm {
-    animation: none;
-  }
-  .github-corner .octo-arm {
-    animation: octocat-wave 560ms ease-in-out;
-  }
+.custom-cluster-icon span {
+  font-size: 14px;
+}
+
+.leaflet-control-attribution {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  color: #000000 !important;
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-control-attribution a {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+.leaflet-control-attribution a:hover {
+  text-decoration: none !important;
 }
