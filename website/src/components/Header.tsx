@@ -20,7 +20,7 @@ const Header = () => {
 
         <nav className="flex space-x-6">
           <Link
-            href="/dashboard"
+            href="/"
             className="hover:text-gray-600 pl-2 py-2 text-2xl transition-colors duration-200"
           >
             Dashboard

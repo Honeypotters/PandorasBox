@@ -16,7 +16,7 @@ interface LayoutProps {
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex flex-col h-screen w-full">
       <Head>
         <meta httpEquiv="content-language" content="en-us"></meta>
         <meta name="author" content="The Honeypotters"></meta>
@@ -39,7 +39,9 @@ export default function RootLayout({ children }: LayoutProps) {
       </Head>
       <Header />
 
-      <main className="flex mt-16 w-full">{children}</main>
+      <div className="flex flex-grow overflow-y-hidden">
+        <main className="w-full pt-16 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }
