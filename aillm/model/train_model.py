@@ -25,30 +25,30 @@ def tokenize_data():
             full_text,
             truncation=True,
             padding="max_length",
-            max_length=512,
+            max_length=1000,
         )
         tokens["labels"] = tokens["input_ids"].copy()
         return tokens
 
-    tokenized_dataset = dataset.map(format, batched=True)
+    tokenized_dataset = dataset.map(format, batched=False)
     return tokenized_dataset.train_test_split(test_size=0.1), tokenizer
 
 def training(data, tokenizer):
     model = AutoModelForCausalLM.from_pretrained(CHECKPOINT)
 
     training_args = TrainingArguments(
-        "test-trainer",
-        # evaluation_strategy="epoch",
+        # "test-trainer",
+        evaluation_strategy="epoch",
         # logging_strategy="epoch",
         # save_strategy="epoch",
-        # per_device_train_batch_size=2,
-        # per_device_eval_batch_size=2,
-        # num_train_epochs=3,
-        # learning_rate=5e-5,
-        # weight_decay=0.01,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        num_train_epochs=3,
+        learning_rate=5e-5,
+        weight_decay=0.01,
         # save_total_limit=2,
         # logging_dir="logs",
-        # fp16=True,
+        fp16=True,
         # report_to="none",
 
 
@@ -70,8 +70,8 @@ def training(data, tokenizer):
 def main():
     tokenized_dataset, tokenizer = tokenize_data()
     trainer = training(data=tokenized_dataset, tokenizer=tokenizer)
-    trainer.save_model("saved_model")
-    tokenizer.save_pretrained("saved_model")
+    trainer.save_model(SAVE_LOCATION)
+    tokenizer.save_pretrained(SAVE_LOCATION)
 
 if __name__ == "__main__":
     main()
