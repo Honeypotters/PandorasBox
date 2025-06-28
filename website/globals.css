@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --scrollbar-color: #000000;
+  --scrollbar-hover-color: #333333;
+  --scrollbar-active-color: #555555;
+}
+
+::-webkit-scrollbar {
+  width: 12px; 
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color);
+  border-radius: 0; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover-color);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-active-color);
+  border-radius: 0; 
+}
+
+* {
+  scrollbar-color: var(--scrollbar-color) transparent;
+}
+
+.github-corner:hover .octo-arm {
+  animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  20%, 60% {
+    transform: rotate(-25deg);
+  }
+  40%, 80% {
+    transform: rotate(10deg);
+  }
+}
+
+@media (max-width: 500px) {
+  .github-corner:hover .octo-arm {
+    animation: none;
+  }
+  .github-corner .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+  }
+}

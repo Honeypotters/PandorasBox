@@ -1,31 +1,34 @@
-import type { Config } from 'tailwindcss'
-import colors from 'tailwindcss/colors'
-import { fontFamily } from 'tailwindcss/defaultTheme'
+/* eslint-disable @typescript-eslint/no-require-imports */
+import type { Config } from 'tailwindcss';
 
 export default {
+  important: true,
   content: [
-    'src/**/*!(*.stories|*.spec|*.test).{ts,tsx}',
-    'stories/*.stories.{ts,tsx}',
-    'index.html',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './*.{js,ts,jsx,tsx,mdx}',
+    // Content for prod
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './layouts/**/*.{js,ts,jsx,tsx}',
+    './public/**/*.html',
   ],
-  darkMode: 'class',
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Inter Variable', ...fontFamily.sans],
-        mono: ['JetBrains Mono Variable', ...fontFamily.mono],
-      },
       colors: {
-        primary: colors.indigo,
-        destructive: colors.red,
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+      },
+      spacing: {
+        128: '32rem',
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/aspect-ratio'),
-    require('@tailwindcss/typography'),
-    require('tailwindcss-animate'),
-    require('tailwindcss-react-aria-components'),
-  ],
-} satisfies Config
+  plugins: [require('@tailwindcss/typography')],
+} satisfies Config;
