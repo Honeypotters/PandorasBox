@@ -1,18 +1,77 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import numpy as np
+from datasets import load_dataset
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    TrainingArguments, 
+    Trainer
+)
 
-checkpoint = "distilgpt2"
-tokenizer = "model/full_tokenizer"
+CHECKPOINT = "distilgpt2"
+DATA_FP = "data/flows_formatted.jsonl"
+SAVE_LOCATION = "model/saved_model/run_1"
 
-model = AutoModelForCausalLM.from_pretrained(checkpoint)
-tokenizer = AutoTokenizer.from_pretrained()
+def tokenize_data():
+    tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
+    tokenizer.pad_token = tokenizer.eos_token
 
-raw_inputs = [
-    "GET /api/user?id=42 HTTP/1.1\nHost: honeypot.net\n\n",
-    "POST /api/login HTTP/1.1\nHost: honeypot.net\n\nusername=admin&password=1234"
-]
+    dataset = load_dataset("json", data_files=DATA_FP, split="train")
 
-inputs = tokenizer(raw_inputs, return_tensors="pt", padding=True, truncation=True)
+    def format(example):
+        prompt = example["prompt"]
+        response = example["response"]
+        full_text = f"<PROMPT>\n{prompt}\n\n<RESPONSE>\n{response}"
+        tokens = tokenizer(
+            full_text,
+            truncation=True,
+            padding="max_length",
+            max_length=512,
+        )
+        tokens["labels"] = tokens["input_ids"].copy()
+        return tokens
 
-outputs = model(**inputs)
+    tokenized_dataset = dataset.map(format, batched=True)
+    return tokenized_dataset.train_test_split(test_size=0.1), tokenizer
 
-print("Logits shape:", outputs.logits.shape)
+def training(data, tokenizer):
+    model = AutoModelForCausalLM.from_pretrained(CHECKPOINT)
+
+    training_args = TrainingArguments(
+        "test-trainer",
+        # evaluation_strategy="epoch",
+        # logging_strategy="epoch",
+        # save_strategy="epoch",
+        # per_device_train_batch_size=2,
+        # per_device_eval_batch_size=2,
+        # num_train_epochs=3,
+        # learning_rate=5e-5,
+        # weight_decay=0.01,
+        # save_total_limit=2,
+        # logging_dir="logs",
+        # fp16=True,
+        # report_to="none",
+
+
+        # gradient_accumulation_steps=4,
+        # lr_scheduler_type="cosine",
+    )
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=data["train"],
+        eval_dataset=data["test"],
+        tokenizer=tokenizer,
+    )
+
+    trainer.train()
+    return trainer
+
+def main():
+    tokenized_dataset, tokenizer = tokenize_data()
+    trainer = training(data=tokenized_dataset, tokenizer=tokenizer)
+    trainer.save_model("saved_model")
+    tokenizer.save_pretrained("saved_model")
+
+if __name__ == "__main__":
+    main()
