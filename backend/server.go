@@ -4,18 +4,33 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 var validHeaders = map[string]bool{
 	// placeholder
-	"user-agent": true,
+	"host":            true,
+	"user-agent":      true,
+	"accept":          true,
+	"accept-language": true,
+	"accept-encoding": true,
+	"x-csrf-token":    true,
+	"referer":         true,
+}
+
+func checkValidHeader(header string) bool {
+	return validHeaders[strings.ToLower(header)]
 }
 
 func headers(w http.ResponseWriter, req *http.Request) {
 	// use a var to get only headers we want, then send them off
 	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Fprintf(w, "%v: %v\n", name, h)
+		if checkValidHeader(name) {
+			for _, h := range headers {
+
+				fmt.Fprintf(w, "%v: %v\n", name, h)
+
+			}
 		}
 	}
 }
