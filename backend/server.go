@@ -8,7 +8,6 @@ import (
 )
 
 var validHeaders = map[string]bool{
-	// placeholder
 	"host":            true,
 	"user-agent":      true,
 	"accept":          true,
@@ -22,17 +21,30 @@ func checkValidHeader(header string) bool {
 	return validHeaders[strings.ToLower(header)]
 }
 
+func requestLineJson(req *http.Request) string {
+	var sb strings.Builder
+	sb.WriteString("{\n\"prompt\": {\n")
+	sb.WriteString(fmt.Sprintf("\"method\": \"%v\",\n", req.Method))
+	sb.WriteString(fmt.Sprintf("\"url\": \"%v\",\n", req.URL))
+	sb.WriteString(fmt.Sprintf("\"protocol\": \"%v\",\n", req.Proto))
+	return sb.String()
+}
+
 func headers(w http.ResponseWriter, req *http.Request) {
-	// use a var to get only headers we want, then send them off
+	// Craft http request line
+	var request strings.Builder
+	request.WriteString(requestLineJson(req))
+
 	for name, headers := range req.Header {
 		if checkValidHeader(name) {
 			for _, h := range headers {
-
-				fmt.Fprintf(w, "%v: %v\n", name, h)
-
+				// May result in unnecessary final ','
+				request.WriteString(fmt.Sprintf("\"%v\": \"%v\",\n", name, h))
 			}
 		}
 	}
+	// Close remaining brackets of request
+	request.WriteString("}\n}\n")
 }
 
 func startHttpServer() {
@@ -44,7 +56,7 @@ func startHttpServer() {
 }
 
 func main() {
-	http.HandleFunc("/headers", headers)
+	http.HandleFunc("/", headers)
 
 	startHttpServer()
 }
