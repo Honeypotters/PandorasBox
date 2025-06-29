@@ -23,6 +23,7 @@ func checkValidHeader(header string) bool {
 
 func requestLineJson(req *http.Request) string {
 	var sb strings.Builder
+	// Construct JSON formatting of request
 	sb.WriteString("{\n\"prompt\": {\n")
 	sb.WriteString(fmt.Sprintf("\"method\": \"%v\",\n", req.Method))
 	sb.WriteString(fmt.Sprintf("\"url\": \"%v\",\n", req.URL))
@@ -30,7 +31,7 @@ func requestLineJson(req *http.Request) string {
 	return sb.String()
 }
 
-func headers(w http.ResponseWriter, req *http.Request) {
+func getResponseJson(w http.ResponseWriter, req *http.Request) {
 	// Craft http request line
 	var request strings.Builder
 	request.WriteString(requestLineJson(req))
@@ -45,6 +46,7 @@ func headers(w http.ResponseWriter, req *http.Request) {
 	}
 	// Close remaining brackets of request
 	request.WriteString("}\n}\n")
+	fmt.Fprint(w, request.String())
 }
 
 func startHttpServer() {
@@ -56,7 +58,7 @@ func startHttpServer() {
 }
 
 func main() {
-	http.HandleFunc("/", headers)
+	http.HandleFunc("/", getResponseJson)
 
 	startHttpServer()
 }
