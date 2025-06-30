@@ -11,6 +11,21 @@ import (
 	"time"
 )
 
+type Response struct {
+	Protocol      string            `json:"protocol"`
+	StatusCode    int               `json:"status_code"`
+	StatusMessage string            `json:"status_message"`
+	Headers       map[string]string `json:"headers"`
+}
+
+type LLMResponse struct {
+	Response string `json:"response"`
+}
+
+type ResponseWrapper struct {
+	Response Response `json:"response"`
+}
+
 var validHeaders = map[string]bool{
 	"host":            true,
 	"user-agent":      true,
@@ -65,7 +80,6 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 		if checkValidHeader(name) {
 			for _, h := range headers {
 				// May result in unnecessary final ','
-				//request.WriteString(fmt.Sprintf("\"%v\": \"%v\",\n", name, h))
 				request.WriteString(fmt.Sprintf(",\n\"%v\": \"%v\"", name, h))
 			}
 		}
@@ -80,24 +94,36 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 	LocateRequest(strings.SplitN(req.RemoteAddr, ":", 2)[0])
 	AddResponse(response)
 
-	// FOR TESTING
-	fmt.Fprintf(w, "%s", request.String())
-	fmt.Fprintf(w, "%s", response)
-
-	var headers map[string]any
-	err := json.Unmarshal([]byte(response), &headers)
+	var llmResponse LLMResponse
+	err := json.Unmarshal([]byte(response), &llmResponse)
 	if err != nil {
-		log.Fatalf("Failed to unmarshal json: %v", err)
+		log.Fatalf("Failed to unmarshal outer JSON: %v", err)
 	}
 
-	// Updating date to current time in UTC RFC3339
-	headers["date"] = time.Now().UTC().Format(time.RFC3339)
-	newResponse, err := json.Marshal(headers)
+	var responseWrapper ResponseWrapper
+	err = json.Unmarshal([]byte(llmResponse.Response), &responseWrapper)
 	if err != nil {
-		log.Fatalf("Failed to marshal json: %v", err)
+		log.Fatalf("Failed to unmarshal inner JSON string: %v", err)
 	}
-	w.Header().Set("Content-type", "application/json")
-	json.NewEncoder(w).Encode(newResponse)
+
+	for key, value := range responseWrapper.Response.Headers {
+		if strings.ToLower(key) == "content-length" {
+			continue
+		}
+		if key == "date" {
+			headerTime, err := time.Parse(time.RFC3339, value)
+			if err != nil {
+				continue
+			}
+			w.Header().Set("Date", headerTime.UTC().Format(time.RFC3339))
+		} else {
+			w.Header().Set(key, value)
+		}
+
+	}
+
+	w.WriteHeader(responseWrapper.Response.StatusCode)
+	w.Write([]byte(responseWrapper.Response.StatusMessage))
 
 	// Record and log time taken
 	diff := time.Since(start)
