@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 import json
 import datetime
 
-MODEL_FP = "aillm/model/saved_model/run_6"
+MODEL_FP = "bangu7/honeypot-http-response"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
@@ -116,6 +116,7 @@ def reciever(input):
     print(end - start)
     return tokenizer.decode(outputs[0])
 
+# Logs request (date with response)
 def log_request(response_txt):
     timestamp = datetime.datetime.now().isoformat()
     log_entry = f"[{timestamp}]\n{response_txt}\n{'-'*80}\n"
