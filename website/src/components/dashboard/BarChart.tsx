@@ -22,16 +22,23 @@ interface ChartDataItem {
 interface BarChartProps {
   title: string;
   data: ChartDataItem[];
+  maxBars?: number;
 }
 
-const BarChartComponent: React.FC<BarChartProps> = ({ title, data }) => {
+const BarChartComponent: React.FC<BarChartProps> = ({
+  title,
+  data,
+  maxBars = 8,
+}) => {
+  const processedData = data.slice(0, maxBars);
+
   return (
     <div className="bg-white border border-black p-6 rounded-lg h-full">
       <h2 className="text-lg font-bold text-black mb-4">{title}</h2>
       <div className="w-full h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={data}
+            data={processedData}
             layout="vertical"
             margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
           >
@@ -58,8 +65,8 @@ const BarChartComponent: React.FC<BarChartProps> = ({ title, data }) => {
                 position="right"
                 style={{ fill: "#1f2937", fontSize: 12 }}
               />
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {processedData.map((entry) => (
+                <Cell key={`cell-${entry.name}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
@@ -69,4 +76,4 @@ const BarChartComponent: React.FC<BarChartProps> = ({ title, data }) => {
   );
 };
 
-export default BarChartComponent;
+export default React.memo(BarChartComponent);
