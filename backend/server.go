@@ -68,7 +68,11 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 	// Close remaining brackets of request
 	request.WriteString("\n}\n}\n")
 	fmt.Fprintf(w, "%s", request.String())
+	AddRequest(request.String())
+	LocateRequest(strings.SplitN(req.RemoteAddr, ":", 2)[0])
+
 	response := postToLlm(request.String())
+	AddResponse(response)
 	fmt.Fprintf(w, "%s", response)
 }
 
