@@ -34,6 +34,10 @@
 
 - [![Next][Next.js]][Next-url]
 - [![React][React.js]][React-url]
+- [![Python][Python.js]][Python-url]
+- [![Go][Go.js]][Go-url]
+- [![CSS][CSS.js]][CSS-url]
+- [![JavaScript][JavaScript.js]][JavaScript-url]
 
 
 ## Getting Started
@@ -47,6 +51,11 @@
   npm install npm@latest -g
   ```
 
+- pip
+  ```sh
+  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+  pip install transformers datasets scikit-learn flask time argparse
+  ```
 ### Installation
 
 
