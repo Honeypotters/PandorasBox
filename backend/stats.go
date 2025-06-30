@@ -189,7 +189,7 @@ func initGemini() *genai.Client {
 	ctx := context.Background()
 
 	if googleAiAPIKey == "" {
-		log.Fatal("GOOGLE_AI_API_KEY environment variable not set")
+		log.Fatal("GEMINI_API_KEY environment variable not set")
 		os.Exit(1)
 	}
 
@@ -245,6 +245,8 @@ func categoriseRequest(request string) {
 		categorisedCounts["Uncategorized or Novel"]++
 		return
 	}
+
+	log.Printf("AI response for request '%s': %+v", request, aiResponse)
 
 	if aiResponse.CategoryIndex >= 0 && aiResponse.CategoryIndex < len(categories) {
 		category := categories[aiResponse.CategoryIndex]

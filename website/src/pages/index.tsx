@@ -106,7 +106,7 @@ export default function DashboardPage() {
           (requestString: string) => {
             try {
               const requestObject = JSON.parse(requestString);
-              const promptObject = requestObject.response.response;
+              const promptObject = requestObject.response;
 
               return JSON.stringify(promptObject, null, 2);
             } catch (error) {
@@ -118,6 +118,7 @@ export default function DashboardPage() {
         while (lastResponsesProcessed.length < 10) {
           lastResponsesProcessed.push("-");
         }
+
         setLast10Responses(lastResponsesProcessed);
         setLast10Requests(lastRequestsProcessed);
 
