@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gammazero/deque"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/oschwald/geoip2-golang/v2"
@@ -44,6 +45,10 @@ type TagCounts struct {
 
 type Locations struct {
 	Locations []Location `json:"locations"`
+}
+
+type Count struct {
+	Count int `json:"count"`
 }
 
 type Location struct {
@@ -83,6 +88,10 @@ func getUptime(c *gin.Context) {
 		UptimeMinutes: int(time.Since(startupTime).Abs().Minutes()),
 	}
 	c.JSON(http.StatusOK, uptime)
+}
+
+func getRequestCount(c *gin.Context) {
+	c.JSON(http.StatusOK, Count{Count: requestCount})
 }
 
 func getAverageResponseTime(c *gin.Context) {
@@ -149,8 +158,8 @@ func AddRequest(request string) {
 		requests.PopFront()
 	}
 
-	responses.PushBack(request)
-	responseCount++
+	requests.PushBack(request)
+	requestCount++
 
 	categoriseRequest(request)
 }
@@ -317,6 +326,7 @@ func startStats() {
 
 	// Set up the Gin router
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	// API endpoints
 	router.GET("/uptime", getUptime)
@@ -326,6 +336,7 @@ func startStats() {
 	router.GET("/categorised-counts", getCategorisedCounts)
 	router.GET("/tag-counts", getTagCounts)
 	router.GET("/locations", getLocations)
+	router.GET("/request-count", getRequestCount)
 
 	// Start the server
 	router.Run(":8080")
