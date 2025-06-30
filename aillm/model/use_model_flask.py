@@ -3,26 +3,19 @@ import time
 import torch
 from flask import Flask, jsonify, request
 import json
+import datetime
 
-MODEL_FP = "saved_model/run_5"
+MODEL_FP = "aillm/model/saved_model/run_6"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_FP)
 
-
 def convert_http_to_json(http_string: str) -> dict:
     """
     Parses a raw HTTP request and response string into a structured dictionary.
-
-    Args:
-        http_string: A string containing the HTTP request (<PROMPT>) and
-                     response (<RESPONSE>) data.
-
-    Returns:
-        A dictionary with the parsed data.
     """
-    # 1. Separate the main prompt and response sections
+    # Separate the main prompt and response sections
     try:
         prompt_section, response_section = http_string.strip().split("<RESPONSE>", 1)
     except ValueError:
@@ -31,7 +24,7 @@ def convert_http_to_json(http_string: str) -> dict:
     # Clean up the prompt section from its tag
     prompt_section = prompt_section.replace("<PROMPT>", "").strip()
 
-    # 3. Process the Response
+    # Process the Response
     response_parts = response_section.strip().split("\n\n", 1)
     response_header_lines = response_parts[0].split("\n")
     status_line = response_header_lines[0].split(None, 2)
@@ -55,24 +48,15 @@ def convert_http_to_json(http_string: str) -> dict:
                 key, value = parts
                 response_data["headers"][key.strip().lower()] = value.strip()
 
-    # 4. Combine into the final structure
+    # Combine into the final structure
     final_structure = {"response": response_data}
 
-    # 5. Return the dictionary
+    # Return the dictionary
     return final_structure
-
 
 def json_to_http_request_string(json_data):
     """
     Converts a JSON object representing an HTTP request into a formatted string.
-
-    Args:
-        json_data (dict or str): A dictionary or a JSON string containing
-                                 the request details under a "prompt" key.
-
-    Returns:
-        str: A string formatted as an HTTP request, or an error message
-             if the input format is incorrect.
     """
     # If the input is a JSON string, parse it into a dictionary
     if isinstance(json_data, str):
@@ -116,6 +100,7 @@ def json_to_http_request_string(json_data):
     return f"<PROMPT>\n{request_details}\n\n<RESPONSE>"
 
 
+# Generate response
 def reciever(input):
     start = time.time()
     inputs = tokenizer(input, return_tensors="pt").to(device)
@@ -131,35 +116,27 @@ def reciever(input):
     print(end - start)
     return tokenizer.decode(outputs[0])
 
+def log_request(response_txt):
+    timestamp = datetime.datetime.now().isoformat()
+    log_entry = f"[{timestamp}]\n{response_txt}\n{'-'*80}\n"
+    with open("aillm/data/request_logs.txt", "a", encoding="utf-8") as log_file:
+        log_file.write(log_entry)
 
 app = Flask(__name__)
 
-
-def format(example):
-    prompt = example["prompt"]
-    full_text = f"<PROMPT>\n{prompt}\n\n<RESPONSE>"
-    tokens = tokenizer(
-        full_text,
-        truncation=True,
-        padding="max_length",
-        max_length=1000,
-    )
-    tokens["labels"] = tokens["input_ids"].copy()
-    return tokens
-
-
+# Process request
 @app.route("/api", methods=["POST"])
 def get_response():
     data = request.get_json()
     response_txt = reciever(json_to_http_request_string(data))
-    print(response_txt)
     response_json = convert_http_to_json(response_txt)
+
+    log_request(response_txt)
 
     if not response_json:
         return jsonify({"error": "Invalid HTTP response format"}), 400
 
     return jsonify({"response": response_json}), 201
-
 
 if __name__ == "__main__":
     app.run(debug=True)
