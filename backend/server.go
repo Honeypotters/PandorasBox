@@ -60,5 +60,6 @@ func startHttpServer() {
 func main() {
 	http.HandleFunc("/", getResponseJson)
 
+	startStats()
 	startHttpServer()
 }
