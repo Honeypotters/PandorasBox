@@ -19,12 +19,18 @@ def parse_args():
         required=True,
         help="Name of the current run",
     )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        required=False,
+        help="Model to train from (default: distilgpt2)",
+    )
     args = parser.parse_args()
     return args
 
 args = parse_args()
 
-CHECKPOINT = "distilgpt2"
+CHECKPOINT = args.checkpoint if args.checkpoint else "distilgpt2"
 DATA_FP = "data/synthetic_http_traffic_skewed.jsonl"
 SAVE_LOCATION = "model/saved_model/{args.run_name}"
 

@@ -1,28 +1,32 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
 import torch
+import argparse
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MODEL_FP = "model/saved_model/checkpoint-999"
+# Get the name of the run
+def parse_args():
+    parser = argparse.ArgumentParser(description="Fine-tuning model")
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        required=True,
+        help="Model to test",
+    )
+    args = parser.parse_args()
+    return args
+
+args = parse_args()
+
+MODEL_FP = "model/saved_model/{args.checkpoint}"
 
 # Load in pretrained model
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_FP)
 
 # Example inputs to test model
-input_text = [
-    """<PROMPT>
-GET https://po.smp46.me/api/settings HTTP/1.1
-user-agent: Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0
-accept: application/json, text/plain, */*
-accept-language: en-US,en;q=0.5
-accept-encoding: gzip, deflate, br, zstd
-x-csrf-token: TEST_TOKEN
-referer: https://po.smp46.me/
-
-<RESPONSE>
-""", 
+input_text = [ 
 """<PROMPT>
 POST https://example.com/api/login HTTP/1.1
 content-type: application/json
