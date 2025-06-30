@@ -6,9 +6,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MODEL_FP = "model/saved_model/checkpoint-999"
 
+# Load in pretrained model
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_FP)
 
+# Example inputs to test model
 input_text = [
     """<PROMPT>
 GET https://po.smp46.me/api/settings HTTP/1.1
@@ -52,15 +54,14 @@ referer: https://example.com/dashboard
 
 start = time.time()
 inputs = tokenizer(input_text[0], return_tensors="pt").to(device)
-with torch.no_grad(): # skip overhead
+with torch.no_grad(): # Skip overhead
     outputs = model.generate(
         **inputs,
         do_sample=True,
-        penalty_alpha=0.6,
+        penalty_alpha=0.6, # To reduce repeated headers
         top_k=20,
-        max_new_tokens=200,
+        max_new_tokens=200, # Stop model from generating more responses
     )
 end = time.time()
-print(end - start)
+print("Time to tokenize and generate prompt: ", end - start)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-
