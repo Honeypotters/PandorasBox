@@ -142,3 +142,5 @@ vite.config.ts.timestamp-*
 GeoLite2-City.mmdb
 
 aillm/model/saved_model/*
+
+*logs.txt

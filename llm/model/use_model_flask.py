@@ -6,10 +6,12 @@ import json
 import datetime
 
 MODEL_FP = "bangu7/honeypot-http-response"
+LOG_PATH = "request_logs.txt"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_FP)
+
 
 def convert_http_to_json(http_string: str) -> dict:
     """
@@ -53,6 +55,7 @@ def convert_http_to_json(http_string: str) -> dict:
 
     # Return the dictionary
     return final_structure
+
 
 def json_to_http_request_string(json_data):
     """
@@ -116,14 +119,17 @@ def reciever(input):
     print(end - start)
     return tokenizer.decode(outputs[0])
 
+
 # Logs request (date with response)
 def log_request(response_txt):
     timestamp = datetime.datetime.now().isoformat()
     log_entry = f"[{timestamp}]\n{response_txt}\n{'-'*80}\n"
-    with open("aillm/data/request_logs.txt", "a", encoding="utf-8") as log_file:
+    with open(LOG_PATH, "a", encoding="utf-8") as log_file:
         log_file.write(log_entry)
 
+
 app = Flask(__name__)
+
 
 # Process request
 @app.route("/api", methods=["POST"])
@@ -138,6 +144,7 @@ def get_response():
         return jsonify({"error": "Invalid HTTP response format"}), 400
 
     return jsonify({"response": response_json}), 201
+
 
 if __name__ == "__main__":
     app.run(debug=True)
