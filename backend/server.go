@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
 
 var validHeaders = map[string]bool{
@@ -52,6 +54,9 @@ func postToLlm(request string) string {
 }
 
 func getResponseJson(w http.ResponseWriter, req *http.Request) {
+	// Time response
+	start := time.Now()
+
 	// Craft http request line
 	var request strings.Builder
 	request.WriteString(requestLineJson(req))
@@ -68,13 +73,36 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 
 	// Close remaining brackets of request
 	request.WriteString("\n}\n}\n")
-	fmt.Fprintf(w, "%s", request.String())
+	response := postToLlm(request.String())
+
+	// Update statistics
 	AddRequest(request.String())
 	LocateRequest(strings.SplitN(req.RemoteAddr, ":", 2)[0])
-
-	response := postToLlm(request.String())
 	AddResponse(response)
+
+	// FOR TESTING
+	fmt.Fprintf(w, "%s", request.String())
 	fmt.Fprintf(w, "%s", response)
+
+	var headers map[string]any
+	err := json.Unmarshal([]byte(response), &headers)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal json: %v", err)
+	}
+
+	// Updating date to current time in UTC RFC3339
+	headers["date"] = time.Now().UTC().Format(time.RFC3339)
+	newResponse, err := json.Marshal(headers)
+	if err != nil {
+		log.Fatalf("Failed to marshal json: %v", err)
+	}
+	w.Header().Set("Content-type", "application/json")
+	json.NewEncoder(w).Encode(newResponse)
+
+	// Record and log time taken
+	diff := time.Since(start)
+	fmt.Printf("%v\n", diff.Seconds())
+	AddTimeTaken(diff.Seconds())
 }
 
 func startHttpServer() {

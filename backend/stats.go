@@ -25,7 +25,7 @@ type Uptime struct {
 }
 
 type AverageResponseTime struct {
-	AverageResponseTime int `json:"average_response_time"`
+	AverageResponseTime float64 `json:"average_response_time"`
 }
 
 type LastRequests struct {
@@ -63,7 +63,8 @@ type AIResponse struct {
 }
 
 var startupTime = time.Now()
-var responseTimes = []int{}
+
+var responseTimes = new(deque.Deque[float64])
 
 var requests = new(deque.Deque[string])
 var requestCount = 0
@@ -96,16 +97,17 @@ func getRequestCount(c *gin.Context) {
 }
 
 func getAverageResponseTime(c *gin.Context) {
-	if len(responseTimes) == 0 {
+	if responseTimes.Len() == 0 {
 		c.JSON(http.StatusOK, AverageResponseTime{AverageResponseTime: 0})
 		return
 	}
-	var total int64
-	for _, v := range responseTimes {
-		total += int64(v)
+	var total float64
+	for i := 0; i < responseTimes.Len(); i++ {
+		v := (*responseTimes).At(i)
+		total += float64(v)
 	}
 	avgTime := AverageResponseTime{
-		AverageResponseTime: int(total / int64(len(responseTimes))),
+		AverageResponseTime: total / float64(responseTimes.Len()),
 	}
 	c.JSON(http.StatusOK, avgTime)
 }
@@ -172,6 +174,15 @@ func AddResponse(response string) {
 
 	responses.PushBack(response)
 	responseCount++
+}
+
+// Adds a time to queue of response times
+func AddTimeTaken(time float64) {
+	if responseTimes.Len() >= 10 {
+		responseTimes.PopFront()
+	}
+
+	responseTimes.PushBack(time)
 }
 
 func initGemini() *genai.Client {
@@ -306,7 +317,7 @@ func startStats(wg *sync.WaitGroup) {
 		log.Println("Warning: Error loading .env file, continuing with environment variables.")
 	}
 	googleAiAPIKey = os.Getenv("GEMINI_API_KEY")
-	prompt = os.Getenv("GEMINI_PROMPT")
+	prompt = os.Getenv("GEMINI_PROMPT") // Corrected env var name?
 
 	// Initialize the Google Gemini AI client
 	geminiClient = initGemini()
