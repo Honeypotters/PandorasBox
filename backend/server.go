@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 var validHeaders = map[string]bool{
@@ -82,12 +83,29 @@ func startHttpServer() {
 	if err != nil {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
+
 }
 
 func main() {
 	http.HandleFunc("/", getResponseJson)
 
-	startStats()
+	// Use a WaitGroup to ensure stats services are initialized before we proceed.
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// Start the stats server, passing the WaitGroup.
+	go startStats(&wg)
+
+	// Wait here until the stats service signals it has finished initializing.
+	log.Println("Main: Waiting for stats service to initialize...")
+	wg.Wait()
+	log.Println("Main: Stats service initialized. Starting HTTP server.")
+
+	// Now that stats are initialized, we can safely defer the DB closure.
+	if geoDb != nil {
+		defer geoDb.Close()
+	}
+
 	startHttpServer()
 }
 
