@@ -1,4 +1,9 @@
-flask
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch
+torchvision
+torchaudio
+accelerate>=0.26.0
 transformers
 datasets
 scikit-learn
+flask
