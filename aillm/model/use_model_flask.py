@@ -4,7 +4,7 @@ import torch
 from flask import Flask, jsonify, request
 import json
 
-MODEL_FP = "/home/smp/Documents/PandorasBoxOffline/run_5"
+MODEL_FP = "saved_model/run_5"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
@@ -60,8 +60,9 @@ def convert_http_to_json(http_string: str) -> str:
     }
 
     for line in response_header_lines[1:]:
-        if line.strip():
-            key, value = line.split(":", 1)
+        parts = line.split(":", 1)
+        if len(parts) == 2:
+            key, value = parts
             response_data["headers"][key.strip().lower()] = value.strip()
 
     final_structure = {"response": response_data}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,8 +28,26 @@ func requestLineJson(req *http.Request) string {
 	sb.WriteString("{\n\"prompt\": {\n")
 	sb.WriteString(fmt.Sprintf("\"method\": \"%v\",\n", req.Method))
 	sb.WriteString(fmt.Sprintf("\"url\": \"%v\",\n", req.URL))
-	sb.WriteString(fmt.Sprintf("\"protocol\": \"%v\",\n", req.Proto))
+	sb.WriteString(fmt.Sprintf("\"protocol\": \"%v\"", req.Proto))
 	return sb.String()
+}
+
+func postToLlm(request string) string {
+	url := "http://127.0.0.1:5000/api"
+	body := strings.NewReader(request)
+
+	resp, err := http.Post(url, "application/json", body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = buf.ReadFrom(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return buf.String()
 }
 
 func getResponseJson(w http.ResponseWriter, req *http.Request) {
@@ -40,13 +59,17 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 		if checkValidHeader(name) {
 			for _, h := range headers {
 				// May result in unnecessary final ','
-				request.WriteString(fmt.Sprintf("\"%v\": \"%v\",\n", name, h))
+				//request.WriteString(fmt.Sprintf("\"%v\": \"%v\",\n", name, h))
+				request.WriteString(fmt.Sprintf(",\n\"%v\": \"%v\"", name, h))
 			}
 		}
 	}
+
 	// Close remaining brackets of request
-	request.WriteString("}\n}\n")
-	fmt.Fprint(w, request.String())
+	request.WriteString("\n}\n}\n")
+	fmt.Fprintf(w, "%s", request.String())
+	response := postToLlm(request.String())
+	fmt.Fprintf(w, "%s", response)
 }
 
 func startHttpServer() {
@@ -62,3 +85,5 @@ func main() {
 
 	startHttpServer()
 }
+
+// Convert to json, send to api with request, receive the request, convert json to http request and return
