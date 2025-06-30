@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [requestCategoryData, setRequestCategoryData] = useState<ChartData[]>(
     [],
   );
+  const [requestTagData, setRequestTagData] = useState<ChartData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +55,7 @@ export default function DashboardPage() {
           lastRequestsRes,
           lastResponsesRes,
           categoryCountsRes,
+          requestTagsRes,
         ] = await Promise.all([
           fetch(`${API_BASE_URL}/uptime`),
           fetch(`${API_BASE_URL}/average-response-time`),
@@ -62,6 +64,7 @@ export default function DashboardPage() {
           fetch(`${API_BASE_URL}/last-ten-requests`),
           fetch(`${API_BASE_URL}/last-ten-responses`),
           fetch(`${API_BASE_URL}/categorised-counts`),
+          fetch(`${API_BASE_URL}/tag-counts`),
         ]);
 
         const uptimeData = await uptimeRes.json();
@@ -71,14 +74,52 @@ export default function DashboardPage() {
         const lastRequestsData = await lastRequestsRes.json();
         const lastResponsesData = await lastResponsesRes.json();
         const categoryCountsData = await categoryCountsRes.json();
+        const requestTagsData = await requestTagsRes.json();
+
+        const lastRequestsRaw = lastRequestsData.last_10_requests || [];
+        const lastResponsesRaw = lastResponsesData.last_10_responses || [];
 
         setUptime(uptimeData.uptime_minutes || 0);
         setAvgResponseTime(avgTimeData.average_response_time || 0);
         setRequestsReceived(requestsCountData.count || 0);
         setRequestLocations(locationsData.locations || []);
 
-        setLast10Requests(lastRequestsData.last_10_requests || []);
-        setLast10Responses(lastResponsesData.last_10_responses || []);
+        const lastRequestsProcessed = lastRequestsRaw.map(
+          (requestString: string) => {
+            try {
+              const requestObject = JSON.parse(requestString);
+
+              const promptObject = requestObject.prompt;
+
+              return JSON.stringify(promptObject, null, 2);
+            } catch (error) {
+              return "Error: Malformed request data";
+            }
+          },
+        );
+
+        while (lastRequestsProcessed.length < 10) {
+          lastRequestsProcessed.push("-");
+        }
+
+        const lastResponsesProcessed = lastResponsesRaw.map(
+          (requestString: string) => {
+            try {
+              const requestObject = JSON.parse(requestString);
+              const promptObject = requestObject.response.response;
+
+              return JSON.stringify(promptObject, null, 2);
+            } catch (error) {
+              return "Error: Malformed request data";
+            }
+          },
+        );
+
+        while (lastResponsesProcessed.length < 10) {
+          lastResponsesProcessed.push("-");
+        }
+        setLast10Responses(lastResponsesProcessed);
+        setLast10Requests(lastRequestsProcessed);
 
         if (categoryCountsData.category_counts) {
           const chartData = Object.entries(
@@ -89,6 +130,18 @@ export default function DashboardPage() {
             color: CATEGORY_COLORS[name] || "#d1d5db",
           }));
           setRequestCategoryData(chartData);
+        }
+
+        if (requestTagsData.tag_counts) {
+          const chartData = Object.entries(requestTagsData.tag_counts)
+            .map(([name, value]) => ({
+              name,
+              value: value as number,
+              color: CATEGORY_COLORS[name] || "#d1d5db",
+            }))
+            .sort((a, b) => b.value - a.value);
+
+          setRequestTagData(chartData);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -115,7 +168,7 @@ export default function DashboardPage() {
           />
           <StatCard
             title="Average Response Time"
-            value={`${(avgResponseTime / 1000).toFixed(1)}s`}
+            value={avgResponseTime.toFixed(2) + "s"}
           />
           <StatCard title="Uptime" value={`${Math.floor(uptime / 60)}hrs`} />
 
@@ -123,19 +176,16 @@ export default function DashboardPage() {
             <RequestMap locations={requestLocations} />
           </div>
 
-          <div className="space-y-6 overflow-x-scroll">
-            <ActivityList title="Last 10 Requests" items={last10Requests} />
-            <ActivityList title="Last 10 Responses" items={last10Responses} />
+          <div className="space-y-6">
+            <ActivityList title="Recent Requests" items={last10Requests} />
+            <ActivityList title="Recent Responses" items={last10Responses} />
           </div>
 
           <div className="md:col-span-1">
             <DonutChart title="Request Categories" data={requestCategoryData} />
           </div>
           <div className="md:col-span-2">
-            <BarChart
-              title="Request Volume by Category"
-              data={requestCategoryData}
-            />
+            <BarChart title="Request Volume by Tag" data={requestTagData} />
           </div>
         </div>
       </main>
