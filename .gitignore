@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 *.mmdb
 GeoLite2-City.mmdb
+
+aillm/model/saved_model/*
