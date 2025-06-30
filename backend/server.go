@@ -16,6 +16,7 @@ type Response struct {
 	StatusCode    int               `json:"status_code"`
 	StatusMessage string            `json:"status_message"`
 	Headers       map[string]string `json:"headers"`
+	Body          string            `json:"body"`
 }
 
 type LLMResponse struct {
@@ -94,18 +95,39 @@ func getResponseJson(w http.ResponseWriter, req *http.Request) {
 	LocateRequest(strings.SplitN(req.RemoteAddr, ":", 2)[0])
 	AddResponse(response)
 
-	var llmResponse LLMResponse
-	err := json.Unmarshal([]byte(response), &llmResponse)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal outer JSON: %v", err)
+	var flexibleResponse struct {
+		Response json.RawMessage `json:"response"`
+	}
+
+	if err := json.Unmarshal([]byte(response), &flexibleResponse); err != nil {
+		http.Error(w, "Failed to parse initial LLM response", http.StatusInternalServerError)
+		log.Printf("Failed to unmarshal flexible JSON: %v", err)
+		return
 	}
 
 	var responseWrapper ResponseWrapper
-	err = json.Unmarshal([]byte(llmResponse.Response), &responseWrapper)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal inner JSON string: %v", err)
+	rawResponseBytes := bytes.TrimSpace(flexibleResponse.Response)
+
+	// Check if the response is double wrapped
+	if len(rawResponseBytes) > 0 && rawResponseBytes[0] == '"' {
+		var innerJSONString string
+		if err := json.Unmarshal(rawResponseBytes, &innerJSONString); err != nil {
+			http.Error(w, "Failed to unquote inner JSON", http.StatusInternalServerError)
+			log.Printf("Failed to unquote inner JSON string: %v", err)
+			return
+		}
+		if err := json.Unmarshal([]byte(innerJSONString), &responseWrapper); err != nil {
+			log.Printf("Failed to unmarshal inner JSON from string: %v", err)
+			return
+		}
+	} else {
+		if err := json.Unmarshal(rawResponseBytes, &responseWrapper); err != nil {
+			log.Printf("Failed to unmarshal inner JSON from object: %v", err)
+			return
+		}
 	}
 
+	// Set the response headers
 	for key, value := range responseWrapper.Response.Headers {
 		if strings.ToLower(key) == "content-length" {
 			continue
