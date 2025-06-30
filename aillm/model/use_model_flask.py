@@ -11,43 +11,27 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_FP)
 
 
-def convert_http_to_json(http_string: str) -> str:
+def convert_http_to_json(http_string: str) -> dict:
     """
-    Parses a raw HTTP request and response string into a structured JSON object.
+    Parses a raw HTTP request and response string into a structured dictionary.
 
     Args:
         http_string: A string containing the HTTP request (<PROMPT>) and
                      response (<RESPONSE>) data.
 
     Returns:
-        A JSON formatted string with the parsed data.
+        A dictionary with the parsed data.
     """
     # 1. Separate the main prompt and response sections
     try:
-        prompt_section, response_section = http_string.strip().split("<RESPONSE>")
+        prompt_section, response_section = http_string.strip().split("<RESPONSE>", 1)
     except ValueError:
         raise ValueError("Input string must contain '<RESPONSE>' separator.")
 
     # Clean up the prompt section from its tag
     prompt_section = prompt_section.replace("<PROMPT>", "").strip()
 
-    # 2. Process the Prompt (Request)
-    prompt_lines = prompt_section.split("\n")
-    request_line = prompt_lines[0].split()
-
-    prompt_data = {
-        "method": request_line[0],
-        "url": request_line[1],
-        "protocol": request_line[2],
-        "headers": {},
-    }
-
-    # Parse prompt headers
-    for line in prompt_lines[1:]:
-        if line.strip():
-            key, value = line.split(":", 1)
-            prompt_data["headers"][key.strip().lower()] = value.strip()
-
+    # 3. Process the Response
     response_parts = response_section.strip().split("\n\n", 1)
     response_header_lines = response_parts[0].split("\n")
     status_line = response_header_lines[0].split(None, 2)
@@ -59,16 +43,23 @@ def convert_http_to_json(http_string: str) -> str:
         "headers": {},
     }
 
-    for line in response_header_lines[1:]:
-        parts = line.split(":", 1)
-        if len(parts) == 2:
-            key, value = parts
-            response_data["headers"][key.strip().lower()] = value.strip()
+    # Add body to response_data if it exists
+    if len(response_parts) > 1:
+        response_data["body"] = response_parts[1]
 
+    # Parse response headers
+    for line in response_header_lines[1:]:
+        if line.strip():
+            parts = line.split(":", 1)
+            if len(parts) == 2:
+                key, value = parts
+                response_data["headers"][key.strip().lower()] = value.strip()
+
+    # 4. Combine into the final structure
     final_structure = {"response": response_data}
 
-    # 5. Convert to JSON and return
-    return json.dumps(final_structure, indent=2)
+    # 5. Return the dictionary
+    return final_structure
 
 
 def json_to_http_request_string(json_data):

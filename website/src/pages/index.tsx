@@ -77,37 +77,26 @@ export default function DashboardPage() {
         setRequestsReceived(requestsCountData.count || 0);
         setRequestLocations(locationsData.locations || []);
 
-        if (
-          !lastRequestsData.last_10_requests ||
-          lastRequestsData.last_10_requests.length === 0
-        ) {
-          setLast10Requests(["", "", "", "", "", "", "", "", "", "", ""]);
-        }
-        if (
-          !lastResponsesData.last_10_responses ||
-          lastResponsesData.last_10_responses.length === 0
-        ) {
-          setLast10Responses(["", "", "", "", "", "", "", "", "", "", ""]);
-        }
+        setLast10Requests(lastRequestsData.last_10_requests || []);
+        setLast10Responses(lastResponsesData.last_10_responses || []);
 
-        if (categoryCountsData.counts) {
-          const chartData = Object.entries(categoryCountsData.counts).map(
-            ([name, value]) => ({
-              name,
-              value: value as number,
-              color: CATEGORY_COLORS[name] || "#d1d5db",
-            }),
-          );
+        if (categoryCountsData.category_counts) {
+          const chartData = Object.entries(
+            categoryCountsData.category_counts,
+          ).map(([name, value]) => ({
+            name,
+            value: value as number,
+            color: CATEGORY_COLORS[name] || "#d1d5db",
+          }));
           setRequestCategoryData(chartData);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       }
     };
-
     fetchData();
 
-    const intervalId = setInterval(fetchData, 5000);
+    const intervalId = setInterval(fetchData, 10000);
 
     return () => clearInterval(intervalId);
   }, []);
@@ -134,7 +123,7 @@ export default function DashboardPage() {
             <RequestMap locations={requestLocations} />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 overflow-x-scroll">
             <ActivityList title="Last 10 Requests" items={last10Requests} />
             <ActivityList title="Last 10 Responses" items={last10Responses} />
           </div>

@@ -306,7 +306,7 @@ func startStats(wg *sync.WaitGroup) {
 		log.Println("Warning: Error loading .env file, continuing with environment variables.")
 	}
 	googleAiAPIKey = os.Getenv("GEMINI_API_KEY")
-	prompt = os.Getenv("GEMINI_GEMINI_PROMPT") // Corrected env var name?
+	prompt = os.Getenv("GEMINI_PROMPT")
 
 	// Initialize the Google Gemini AI client
 	geminiClient = initGemini()
