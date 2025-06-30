@@ -9,7 +9,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: 12px; 
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
@@ -18,7 +18,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-color);
-  border-radius: 0; 
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -28,14 +28,12 @@
 
 ::-webkit-scrollbar-thumb:active {
   background: var(--scrollbar-active-color);
-  border-radius: 0; 
+  border-radius: 0;
 }
 
 * {
   scrollbar-color: var(--scrollbar-color) transparent;
 }
-
-
 
 /* Leaflet Map Customisation */
 .custom-dot-marker {
@@ -48,7 +46,7 @@
 .custom-cluster-icon {
   display: grid !important;
   place-items: center !important;
-  background-color:rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   color: #ffffff;
   border-radius: 50%;
   font-weight: bold;

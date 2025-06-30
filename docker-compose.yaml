@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" # Port that the HoneyPot listens to and responds on.
+    #   - "8080:8080" # Port the HoneyPot stats servers runs on
+    volumes:
+      - ./backend/GeoLite2-City.mmdb:/app/GeoLite2-City.mmdb:ro
+    networks:
+      - pandorasbox-net
+    restart: always
+    environment:
+      TZ: Australia/Brisbane
+
+  llm:
+    container_name: llm
+    build:
+      context: ./llm/model
+      dockerfile: DockerfileNVD
+    # ports:
+    #   - "5000:5000" # Port that the backend connects to the LLM by
+    volumes:
+      - ./llm/model:/app
+    networks:
+      - pandorasbox-net
+    deploy: # Enable this for Nvidia
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      TZ: Australia/Brisbane
+    restart: always
+
+  website:
+    container_name: website
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Dashboard port
+    depends_on:
+      - backend
+    networks:
+      - pandorasbox-net
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://backend:8080
+      TZ: Australia/Brisbane
+    restart: always
+
+networks:
+  pandorasbox-net:
+    driver: bridge
