@@ -9,6 +9,7 @@ import (
 	"net/netip"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gammazero/deque"
@@ -253,13 +254,11 @@ func categoriseRequest(request string) {
 }
 
 func initGeoIP() *geoip2.Reader {
-	geoDb, err := geoip2.Open("GeoLite2-City.mmdb")
+	db, err := geoip2.Open("GeoLite2-City.mmdb")
 	if err != nil {
-		log.Printf("Error opening GeoIP database: %v", err)
-		os.Exit(1)
+		log.Fatalf("CRITICAL: Error opening GeoIP database: %v", err)
 	}
-	defer geoDb.Close()
-	return geoDb
+	return db
 }
 
 func LocateRequest(requestIP string) {
@@ -270,16 +269,16 @@ func LocateRequest(requestIP string) {
 
 	ip, err := netip.ParseAddr(requestIP)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf(err.Error())
 		return
 	}
 	record, err := geoDb.City(ip)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error looking up IP %s: %v", requestIP, err)
 		return
 	}
 	if !record.HasData() {
-		fmt.Println("No data found for this IP")
+		log.Printf("No location data found for IP %s", requestIP)
 		return
 	}
 
@@ -298,17 +297,16 @@ func LocateRequest(requestIP string) {
 	locations = append(locations, result)
 }
 
-func startStats() {
+func startStats(wg *sync.WaitGroup) {
 	fmt.Println("Stats Server starting...")
 
 	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
-		os.Exit(1)
+		log.Println("Warning: Error loading .env file, continuing with environment variables.")
 	}
 	googleAiAPIKey = os.Getenv("GEMINI_API_KEY")
-	prompt = os.Getenv("GEMINI_PROMPT")
+	prompt = os.Getenv("GEMINI_GEMINI_PROMPT") // Corrected env var name?
 
 	// Initialize the Google Gemini AI client
 	geminiClient = initGemini()
@@ -323,6 +321,11 @@ func startStats() {
 	for _, tag := range tags {
 		tagCounts[tag] = 0
 	}
+
+	// --- Initialization is complete ---
+	log.Println("Stats service initialization finished.")
+	// Signal to the main function that it can proceed.
+	wg.Done()
 
 	// Set up the Gin router
 	router := gin.Default()
