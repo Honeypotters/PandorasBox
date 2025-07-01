@@ -124,8 +124,11 @@ def reciever(input):
 def log_request(response_txt):
     timestamp = datetime.datetime.now().isoformat()
     log_entry = f"[{timestamp}]\n{response_txt}\n{'-'*80}\n"
-    with open(LOG_PATH, "a+", encoding="utf-8") as log_file:
-        log_file.write(log_entry)
+    try:
+        with open(LOG_PATH, "a+", encoding="utf-8") as log_file:
+            log_file.write(log_entry)
+    except Exception as e:
+        print(f"Error writing to log file: {e}")
 
 
 app = Flask(__name__)
