@@ -31,9 +31,14 @@ USER appuser
 # Copy the built binary from the 'builder' stage
 COPY --from=builder /pandora-backend .
 
+COPY .env .env
+COPY *.mmdb .
+
 # Expose port 80 for the honeypot and 8080 for the website
 EXPOSE 80
 EXPOSE 8080
+
+ENV GIN_MODE=release
 
 # Command to run the executable
 CMD ["./pandora-backend"]

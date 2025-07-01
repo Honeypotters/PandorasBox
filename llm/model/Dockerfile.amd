@@ -1,0 +1,24 @@
+# Use an official PyTorch image with CUDA support
+FROM rocm/pytorch:latest
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the requirements file into the container at /app
+COPY requirements_docker.txt .
+
+# Install any needed packages specified in requirements_docker.txt
+RUN pip install --no-cache-dir -r requirements_docker.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Give execute permissions to the script
+RUN chmod +rx use_model_flask.py
+
+# Run the command to start the flask server
+CMD ["python3", "use_model_flask.py"]
+
