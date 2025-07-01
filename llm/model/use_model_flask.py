@@ -6,7 +6,7 @@ import json
 import datetime
 
 MODEL_FP = "bangu7/honeypot-http-response"
-LOG_PATH = "request_logs.txt"
+LOG_PATH = "logs/log.txt"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(MODEL_FP).to(device)
@@ -124,7 +124,7 @@ def reciever(input):
 def log_request(response_txt):
     timestamp = datetime.datetime.now().isoformat()
     log_entry = f"[{timestamp}]\n{response_txt}\n{'-'*80}\n"
-    with open(LOG_PATH, "a", encoding="utf-8") as log_file:
+    with open(LOG_PATH, "a+", encoding="utf-8") as log_file:
         log_file.write(log_entry)
 
 
@@ -147,4 +147,9 @@ def get_response():
 
 
 if __name__ == "__main__":
+    try:
+        open(LOG_PATH, "a+").close()  # Ensure log file exists
+    except Exception as e:
+        print(f"Error creating log file: {e}")
+
     app.run(host="0.0.0.0")

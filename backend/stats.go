@@ -156,6 +156,17 @@ func getLocations(c *gin.Context) {
 	c.JSON(http.StatusOK, locsResp)
 }
 
+func getLogfile(c *gin.Context) {
+	content, err := os.ReadFile("logs/log.txt")
+	if err != nil {
+		log.Printf("Could not read logfile: %v", err)
+		c.String(http.StatusInternalServerError, "could not read logfile")
+		return
+	}
+
+	c.String(http.StatusOK, string(content))
+}
+
 func AddRequest(request string) {
 	if requests.Len() >= 10 {
 		requests.PopFront()
@@ -359,6 +370,7 @@ func startStats(wg *sync.WaitGroup) {
 	router.GET("/tag-counts", getTagCounts)
 	router.GET("/locations", getLocations)
 	router.GET("/request-count", getRequestCount)
+	router.GET("/logfile", getLogfile)
 
 	// Start the server
 	router.Run(":8080")
