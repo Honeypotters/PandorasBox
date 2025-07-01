@@ -9,7 +9,7 @@
   <p align="center">
     Pandora's Box is an AI honey-pot that utilises a fine-tuned version of distilgpt2. It comes with a convenient web interface where you can easily find all the relevant information about the requests it receives. Additionally under backend/.env users can add their free Gemini API key which will automatically classify requests as to whether or not they are malicious.
     <br />
-    It should be noted that this project was made as a part of a weekend hackathon, it is not yet cmpleted
+    It should be noted that this project was made as a part of a weekend hackathon, it is not yet completed and will be further developed in the future.
     <br />
     <a href="https://github.com/Honeypotters/PandorasBox/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
