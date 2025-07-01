@@ -4,37 +4,33 @@
     <img src="website/public/RoundedLogo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Pandora's Box</h3>
+<h1 align="center">Pandora's Box</h1>
 
   <p align="center">
     Pandora's Box is an AI honey-pot that utilises a fine-tuned version of distilgpt2. It comes with a convenient web interface where you can easily find all the relevant information about the requests it receives. Additionally under backend/.env users can add their free Gemini API key which will automatically classify requests as to whether or not they are malicious.
     <br />
     It should be noted that this project was made as a part of a weekend hackathon, it is not yet completed and will be further developed in the future.
     <br />
+        <br />
     <a href="https://github.com/Honeypotters/PandorasBox/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
     <a href="https://github.com/Honeypotters/PandorasBox/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
-## Getting Started
+## Prerequisites
+#### Running without Docker:
+- [Node and npm](https://nodejs.org/en/download)
+- [Golang](https://go.dev/doc/install)
+- [Python](https://www.python.org/downloads/) and [Pytorch](https://pytorch.org/get-started/locally/)
+
+#### Running with Docker:
+- [Docker and Docker Compose](https://docs.docker.com/compose/install/)
 
 
-### Prerequisites
-
-- npm
-
-  ```sh
-  npm install npm@latest -g
-  ```
-
-- pip
-  ```sh
-  pip install -r requirements.txt
-  ```
 
 ## Usage
-For further classification of logs, a Gemini API key can be added here:
+For further classification of logs, a Gemini API key is required here:
 - .env
   ```sh
   PandorasBox/backend/.env
@@ -43,22 +39,26 @@ For further classification of logs, a Gemini API key can be added here:
 To start up Pandora's Box manually requires a few parts:
 - Server
   ```sh
-  go run ./backend/server.go ./backend/stats.go
+  cd backend
+  go get
+  go run server.go stats.go
   ```
 - Web Interface
   ```sh
   cd website
+  npm i
   npm run dev
   ```
 - LLM
   ```sh
-  ./llm/model/use_model_flask.py
+  pip install -r ./llm/model/requirements.txt
+  python3 ./llm/model/use_model_flask.py
   ```
 
 Or to start up Pandora's Box through docker:
-- ```sh
-  docker compose up -d
-  ```
+```sh
+ docker compose up -d
+ ```
 
 ## Contributing
 
