@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -52,7 +53,10 @@ func requestLineJson(req *http.Request) string {
 }
 
 func postToLlm(request string) string {
-	url := "http://127.0.0.1:5000/api"
+	url := os.Getenv("LLM_URL")
+	if url == "" {
+		url = "http://127.0.0.1:5000/api"
+	}
 	body := strings.NewReader(request)
 
 	resp, err := http.Post(url, "application/json", body)
@@ -165,24 +169,21 @@ func startHttpServer() {
 func main() {
 	http.HandleFunc("/", getResponseJson)
 
-	// Use a WaitGroup to ensure stats services are initialized before we proceed.
+	// Ensure stats services are initialized.
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	// Start the stats server, passing the WaitGroup.
 	go startStats(&wg)
 
-	// Wait here until the stats service signals it has finished initializing.
+	// Wait until the stats service has finished initializing.
 	log.Println("Main: Waiting for stats service to initialize...")
 	wg.Wait()
 	log.Println("Main: Stats service initialized. Starting HTTP server.")
 
-	// Now that stats are initialized, we can safely defer the DB closure.
 	if geoDb != nil {
 		defer geoDb.Close()
 	}
 
 	startHttpServer()
 }
-
-// Convert to json, send to api with request, receive the request, convert json to http request and return

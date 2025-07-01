@@ -319,7 +319,7 @@ func startStats(wg *sync.WaitGroup) {
 		log.Println("Warning: Error loading .env file, continuing with environment variables.")
 	}
 	googleAiAPIKey = os.Getenv("GEMINI_API_KEY")
-	prompt = os.Getenv("GEMINI_PROMPT") // Corrected env var name?
+	prompt = os.Getenv("GEMINI_PROMPT")
 
 	// Initialize the Google Gemini AI client
 	geminiClient = initGemini()
@@ -335,16 +335,22 @@ func startStats(wg *sync.WaitGroup) {
 		tagCounts[tag] = 0
 	}
 
-	// --- Initialization is complete ---
+	// Initialization is complete
 	log.Println("Stats service initialization finished.")
 	// Signal to the main function that it can proceed.
 	wg.Done()
 
 	// Set up the Gin router
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-	// API endpoints
 	router.GET("/uptime", getUptime)
 	router.GET("/average-response-time", getAverageResponseTime)
 	router.GET("/last-ten-requests", getLastTenRequests)

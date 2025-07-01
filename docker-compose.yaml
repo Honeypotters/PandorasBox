@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   backend:
     container_name: backend
@@ -8,36 +6,58 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80" # Port that the HoneyPot listens to and responds on.
-    #   - "8080:8080" # Port the HoneyPot stats servers runs on
-    volumes:
-      - ./backend/GeoLite2-City.mmdb:/app/GeoLite2-City.mmdb:ro
-    networks:
-      - pandorasbox-net
+      - "8080:8080" # Stats server API port
     restart: always
     environment:
       TZ: Australia/Brisbane
+      LLM_URL: "http://llm-cpuonly:5000" # Change this to the service name you've picked
+    networks:
+      - pandorasbox-net
 
-  llm:
-    container_name: llm
+  # llm-cuda:
+  #   container_name: llm-cuda
+  #   build:
+  #     context: ./llm/model
+  #     dockerfile: Dockerfile.nvd
+  #   networks:
+  #     - pandorasbox-net
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   environment:
+  #     TZ: Australia/Brisbane
+  #   restart: always
+
+  llm-cpuonly:
+    container_name: llm-cpuonly
     build:
       context: ./llm/model
-      dockerfile: DockerfileNVD
-    # ports:
-    #   - "5000:5000" # Port that the backend connects to the LLM by
-    volumes:
-      - ./llm/model:/app
+      dockerfile: Dockerfile.cpu
     networks:
       - pandorasbox-net
-    deploy: # Enable this for Nvidia
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     environment:
       TZ: Australia/Brisbane
     restart: always
+
+  # llm-rocm:
+  #   container_name: llm-rocm
+  #   build:
+  #     context: ./llm/model
+  #     dockerfile: Dockerfile.amd
+  #   environment:
+  #     TZ: Australia/Brisbane
+  #   restart: always
+  #   devices:
+  #     - /dev/kfd
+  #     - /dev/dri
+  #   group_add:
+  #     - video
+  #   networks:
+  #     - pandorasbox-net
 
   website:
     container_name: website
@@ -48,10 +68,7 @@ services:
       - "3000:3000" # Dashboard port
     depends_on:
       - backend
-    networks:
-      - pandorasbox-net
     environment:
-      NEXT_PUBLIC_BACKEND_URL: http://backend:8080
       TZ: Australia/Brisbane
     restart: always
 
