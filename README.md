@@ -1,15 +1,3 @@
-
-<div align="center">
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![project_license][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-</div>
-
 <br />
 <div align="center">
   <a href="https://github.com/Honeypotters/PandorasBox">
@@ -19,26 +7,15 @@
 <h3 align="center">Pandora's Box</h3>
 
   <p align="center">
-    Pandora's Box is an LLM powered honey-pot, utilizing a custom LLM to provide near-realtime realistic responses to web requests.
+    Pandora's Box is an AI honey-pot that utilises a fine-tuned version of distilgpt2. It comes with a convenient web interface where you can easily find all the relevant information about the requests it receives. Additionally under backend/.env users can add their free Gemini API key which will automatically classify requests as to whether or not they are malicious.
+    <br />
+    It should be noted that this project was made as a part of a weekend hackathon, it is not yet cmpleted
     <br />
     <a href="https://github.com/Honeypotters/PandorasBox/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
     <a href="https://github.com/Honeypotters/PandorasBox/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
-
-## About The Project
-
-
-### Built With
-
-- [![Next][Next.js]][Next-url]
-- [![React][React.js]][React-url]
-- [![Python][Python.js]][Python-url]
-- [![Go][Go.js]][Go-url]
-- [![CSS][CSS.js]][CSS-url]
-- [![JavaScript][JavaScript.js]][JavaScript-url]
-
 
 ## Getting Started
 
@@ -55,13 +32,29 @@
   ```sh
   pip install -r requirements.txt
   ```
-  
-### Installation
-
 
 ## Usage
+To start up Pandora's Box manually requires a few parts
+The go components:
+- Server
+  ```sh
+  go run ./backend/server.go ./backend/stats.go
+  ```
+- Web Interface
+  ```sh
+  cd website
+  npm run dev
+  ```
+- LLM
+  ```sh
+  ./llm/model/use_model_flask.py
+  ```
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Or to start up Pandora's Box through docker:
+- ```sh
+  docker compose up -d
+  ```
+
 
 
 ## Contributing
