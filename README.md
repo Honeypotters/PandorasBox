@@ -40,8 +40,7 @@ For further classification of logs, a Gemini API key can be added here:
   PandorasBox/backend/.env
   ```
 
-To start up Pandora's Box manually requires a few parts
-The go components:
+To start up Pandora's Box manually requires a few parts:
 - Server
   ```sh
   go run ./backend/server.go ./backend/stats.go
