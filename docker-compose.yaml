@@ -8,6 +8,8 @@ services:
       - "80:80" # Port that the HoneyPot listens to and responds on.
       - "8080:8080" # Stats server API port
     restart: always
+    volumes:
+      - "log_data:/app/logs"
     environment:
       TZ: Australia/Brisbane
       LLM_URL: "http://llm-cpuonly:5000" # Change this to the service name you've picked
@@ -37,6 +39,8 @@ services:
     build:
       context: ./llm/model
       dockerfile: Dockerfile.cpu
+    volumes:
+      - "log_data:/app/logs"
     networks:
       - pandorasbox-net
     environment:
@@ -75,3 +79,6 @@ services:
 networks:
   pandorasbox-net:
     driver: bridge
+
+volumes:
+  log_data:
