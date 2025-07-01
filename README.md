@@ -34,6 +34,12 @@
   ```
 
 ## Usage
+For further classification of logs, a Gemini API key can be added here:
+- .env
+  ```sh
+  PandorasBox/backend/.env
+  ```
+
 To start up Pandora's Box manually requires a few parts
 The go components:
 - Server
@@ -54,8 +60,6 @@ Or to start up Pandora's Box through docker:
 - ```sh
   docker compose up -d
   ```
-
-
 
 ## Contributing
 
