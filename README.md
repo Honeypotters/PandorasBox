@@ -5,6 +5,10 @@
   </a>
 
 <h1 align="center">Pandora's Box</h1>
+<b align="center">        🏆 5th Place Winner at LaunchHacks IV Hackathon 🏆</b>
+
+<br />
+<br />
 
   <p align="center">
     Pandora's Box is an AI powered web honey-pot that utilises a fine-tuned version of distilgpt2. Through the use of an LLM, relevant, specific and personalised responses can be made to every incoming request. The project was built with Python, Golang and Typescript.
